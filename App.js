@@ -1,21 +1,19 @@
 import React from 'react';
 import { withExpoSnack } from 'nativewind';
 
-import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from './src/screens/HomeScreen';
-
-const Stack = createNativeStackNavigator()
+import AppNavigator from './src/navigation/AppNavigator';
+import AudioProvider from './src/context/AudioProvider';
+import AudioItem from './src/components/AudioItem';
+import { View } from 'react-native';
 
 const App = () => {
   return (
-
+    <AudioProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">
-          <Stack.Screen name="Home" component={HomeScreen} />
-        </Stack.Navigator>
+        <AppNavigator/>
       </NavigationContainer>
+    </AudioProvider>
   );
 }
 
