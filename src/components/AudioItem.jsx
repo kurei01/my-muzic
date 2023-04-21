@@ -7,17 +7,46 @@ import {
 } from "react-native";
 import React from "react";
 import { Entypo } from "@expo/vector-icons";
-import color from "../utils/color";
-import { convertTime } from "../utils/helper";
+import color from "../misc/color";
+import { convertTime } from "../misc/helper";
 
-const AudioItem = ({title, duration,}) => {
+const renderPlayPauseIcon = (isPlaying) => {
+  if (!isPlaying) {
+    return (
+      <Entypo name="controller-play" size={24} color={color.ACTIVE_FONT} />
+    );
+  }
+  return <Entypo name="controller-paus" size={24} color={color.ACTIVE_FONT} />;
+};
+
+const AudioItem = ({
+  title,
+  duration,
+  onOptionPress,
+  onAudioPress,
+  isPlaying,
+  activeListItem,
+}) => {
   return (
     <>
       <View style={styles.container}>
-        <TouchableWithoutFeedback>
+        <TouchableWithoutFeedback onPress={onAudioPress}>
           <View style={styles.leftContainer}>
-            <View style={styles.thumbnail}>
-              <Text style={styles.thumbnailText}>{title[0]}</Text>
+            <View
+              style={[
+                styles.thumbnail,
+                {
+                  backgroundColor: activeListItem
+                    ? color.ACTIVE_BG
+                    : color.FONT_LIGHT,
+                },
+              ]}
+            >
+              <Text style={styles.thumbnailText}>
+                {activeListItem
+                  ? renderPlayPauseIcon(isPlaying)
+                  : title[0].toUpperCase()}
+              </Text>
             </View>
             <View style={styles.titleContainer}>
               <Text numberOfLines={1} style={styles.title}>
@@ -29,10 +58,11 @@ const AudioItem = ({title, duration,}) => {
         </TouchableWithoutFeedback>
         <View style={styles.rightContainer}>
           <Entypo
+            onPress={onOptionPress}
             name="dots-three-vertical"
-            tw="p-10"
             size={20}
             color={color.FONT_MEDIUM}
+            style={{ padding: 10 }}
           />
         </View>
       </View>
@@ -40,16 +70,6 @@ const AudioItem = ({title, duration,}) => {
     </>
   );
 };
-//     albumId: "1642794701"
-// creationTime: 0
-// duration: 2.867
-// filename: "Êm ái.ogg"
-// height: 0
-// id: "34"
-// mediaType: "audio"
-// modificationTime: 1648461646000
-// uri: "file:///storage/emulated/0/Android/media/com.google.android.gm/Notifications/Calm/Êm ái.ogg"
-// width: 0
 
 const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({

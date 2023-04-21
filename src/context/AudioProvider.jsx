@@ -11,6 +11,13 @@ export class AudioProvider extends Component {
       audioFiles: [],
       permissionError: false,
       dataProvider: new DataProvider((r1, r2) => r1 !== r2),
+      playbackObj: null,
+      soundObj: null,
+      currentAudio: {},
+      isPlaying: false,
+      currentAudioIndex: null,
+      playbackPosition: null,
+      playbackDuration: null,
     };
     this.totalAudioCount = 0;
   }
@@ -33,15 +40,14 @@ export class AudioProvider extends Component {
     let media = await MediaLibrary.getAssetsAsync({
       mediaType: "audio",
     });
-    console.log(media);
     media = await MediaLibrary.getAssetsAsync({
       mediaType: "audio",
       first: media.totalCount,
     });
-    this.totalAudioCount = media.totalCount;
 
-    media.assets = media.assets.filter((file) => file.duration > 3); 
-    console.log(media);
+    media.assets = media.assets.filter((file) => file.duration > 3);
+    this.totalAudioCount = media.assets.length;
+
     this.setState({
       ...this.state,
       dataProvider: dataProvider.cloneWithRows([
@@ -87,8 +93,23 @@ export class AudioProvider extends Component {
     this.getPermission();
   }
 
+  updateState = (prevState, newState = {}) => {
+    this.setState({ ...prevState, ...newState });
+  };
+
   render() {
-    const { audioFiles, dataProvider, permissionError } = this.state;
+    const {
+      audioFiles,
+      dataProvider,
+      permissionError,
+      playbackObj,
+      soundObj,
+      currentAudio,
+      isPlaying,
+      currentAudioIndex,
+      playbackPosition,
+      playbackDuration
+    } = this.state;
     if (permissionError)
       return (
         <View tw="flex-1 items-center justify-center">
@@ -98,7 +119,21 @@ export class AudioProvider extends Component {
         </View>
       );
     return (
-      <AudioContext.Provider value={{ audioFiles, dataProvider }}>
+      <AudioContext.Provider
+        value={{
+          audioFiles,
+          dataProvider,
+          playbackObj,
+          soundObj,
+          currentAudio,
+          isPlaying,
+          currentAudioIndex,
+          playbackPosition,
+          playbackDuration,
+          updateState: this.updateState,
+          totalAudioCount: this.totalAudioCount,
+        }}
+      >
         {this.props.children}
       </AudioContext.Provider>
     );
