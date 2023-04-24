@@ -1,12 +1,12 @@
-import { Dimensions, View } from "react-native";
+import { Dimensions } from "react-native";
 import React, { Component } from "react";
 import { AudioContext } from "../context/AudioProvider";
 import { LayoutProvider, RecyclerListView } from "recyclerlistview";
 import AudioItem from "../components/AudioItem";
 import Screen from "../components/Screen";
 import OptionModal from "../components/OptionModal";
-import { Audio } from "expo-av";
 import { pause, play, playNext, resume } from "../misc/audioController";
+import { storeAudioForNextOpening } from "../misc/helper";
 
 export class AudioList extends Component {
   static contextType = AudioContext;
@@ -34,21 +34,11 @@ export class AudioList extends Component {
     }
   );
 
-  onPlayBackStatusUpdate = (playBackStatus) => {
-    if (playBackStatus.isLoaded && playBackStatus.isPlaying) {
-      this.context.updateState(this.context, {
-        playbackPosition: playBackStatus.positionMillis,
-        playbackDuration: playBackStatus.durationMillis,
-      });
-    }
-  };
-
   handleAudioPress = async (audio) => {
     const { playbackObj, soundObj, currentAudio, updateState, audioFiles } =
       this.context;
     //playing audio fisrttime
     if (soundObj === null) {
-      const playbackObj = new Audio.Sound();
       const status = await play(playbackObj, audio.uri);
       const index = audioFiles.indexOf(audio);
       updateState(this.context, {
@@ -58,7 +48,10 @@ export class AudioList extends Component {
         isPlaying: status.isPlaying,
         currentAudioIndex: index,
       });
-      return playbackObj.setOnPlaybackStatusUpdate(this.onPlayBackStatusUpdate);
+      playbackObj.setOnPlaybackStatusUpdate(
+        this.context.onPlayBackStatusUpdate
+      );
+      return await storeAudioForNextOpening(audio, index);
     }
     //pause audio
     if (
@@ -88,12 +81,13 @@ export class AudioList extends Component {
     if (soundObj.isLoaded && currentAudio.id !== audio.id) {
       const status = await playNext(playbackObj, audio.uri);
       const index = audioFiles.indexOf(audio);
-      return updateState(this.context, {
+      updateState(this.context, {
         currentAudio: audio,
         soundObj: status,
         isPlaying: status.isPlaying,
         currentAudioIndex: index,
       });
+      return await storeAudioForNextOpening(audio, index);
     }
   };
 
@@ -113,10 +107,15 @@ export class AudioList extends Component {
     );
   };
 
+  componentDidMount() {
+    this.context.loadPreviousAudio();
+  }
+
   render() {
     return (
       <AudioContext.Consumer>
         {({ dataProvider, isPlaying }) => {
+          if (!dataProvider._data.length) return null;
           return (
             <Screen>
               <RecyclerListView
@@ -127,7 +126,13 @@ export class AudioList extends Component {
               />
               <OptionModal
                 onPlayPress={() => console.log("playing audio")}
-                onPlayListPress={() => console.log("add audio to playlist")}
+                onPlayListPress={() => {
+                  this.context.updateState(this.context, {
+                    addToPlayList: this.currentItem,
+                  });
+                  this.props.navigation.navigate("PlayList");
+                  this.setState({ ...this.state, optionModalVisible: false });
+                }}
                 currentItem={this.currentItem}
                 onClose={() =>
                   this.setState({ ...this.state, optionModalVisible: false })

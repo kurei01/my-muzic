@@ -1,14 +1,23 @@
 import React from 'react';
 import { withExpoSnack } from 'nativewind';
 
-import { NavigationContainer } from '@react-navigation/native';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './src/navigation/AppNavigator';
 import AudioProvider from './src/context/AudioProvider';
+import color from './src/misc/color';
+
+const MyTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: color.APP_BG,
+  },
+};
 
 const App = () => {
   return (
     <AudioProvider>
-      <NavigationContainer>
+      <NavigationContainer theme={MyTheme}>
         <AppNavigator/>
       </NavigationContainer>
     </AudioProvider>

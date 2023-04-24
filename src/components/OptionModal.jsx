@@ -3,7 +3,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -26,13 +26,13 @@ const OptionModal = ({
           <Text numberOfLines={2} style={styles.title}>
             {filename}
           </Text>
-          <View tw="p-5" style={styles.optionContainer}>
-            <TouchableHighlight onPress={onPlayPress}>
+          <View tw="p-5">
+            <TouchableOpacity onPress={onPlayPress}>
               <Text style={styles.option}>Play</Text>
-            </TouchableHighlight>
-            <TouchableHighlight onPress={onPlayListPress}>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onPlayListPress}>
               <Text style={styles.option}>Add to Playlist</Text>
-            </TouchableHighlight>
+            </TouchableOpacity>
           </View>
         </View>
         <TouchableWithoutFeedback onPress={onClose}>
