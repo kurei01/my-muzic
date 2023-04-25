@@ -1,5 +1,5 @@
 import {
-  FlatList,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,9 +10,12 @@ import color from "../misc/color";
 import PlayListInputModal from "../components/PlayListInputModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AudioContext } from "../context/AudioProvider";
+import PlayListDetail from "../components/PlayListDetail";
 
+let selectedPlayList = {};
 const PlayList = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [showPlayList, setShowPlayList] = useState(false);
 
   const context = useContext(AudioContext);
   const { playList, addToPlayList, updateState } = context;
@@ -54,41 +57,90 @@ const PlayList = () => {
     updateState(context, { playList: JSON.parse(result) });
   };
 
+  const handleBannerPress = async (playList) => {
+    if (addToPlayList) {
+      const result = await AsyncStorage.getItem("playlist");
+      let oldList = [];
+      let updateList = [];
+      let sameAudio = false;
+
+      if (result !== null) {
+        oldList = JSON.parse(result);
+        updateList = oldList.filter((list) => {
+          if (list.id === playList.id) {
+            //CHECK AUDIO IS ALREADY IN LIST OR NOT
+            for (let audio of list.audios) {
+              if (audio.id === addToPlayList.id) return (sameAudio = true);
+            }
+            // OTHERWISE UPDATE PLAYLIST
+            list.audios = [...list.audios, addToPlayList];
+          }
+          return list;
+        });
+      }
+
+      if (sameAudio) {
+        Alert.alert(
+          "Found same audio!",
+          `${addToPlayList.filename} is already the list.`
+        );
+        sameAudio = false;
+        return updateState(context, {
+          addToPlayList: null,
+        });
+      }
+      updateState(context, {
+        addToPlayList: null,
+        playList: [...updateList],
+      });
+      return await AsyncStorage.setItem(
+        "playlist",
+        JSON.stringify([...updateList])
+      );
+    }
+    //no selected audio, simple open playlist
+    selectedPlayList = playList;
+    setShowPlayList(true);
+  };
+
   useEffect(() => {
     !playList.length && renderPlayList();
   }, []);
 
   return (
-    <ScrollView tw="p-5">
-      <TouchableOpacity style={styles.playListBanner}>
-        <Text>My favorite</Text>
-        <Text style={styles.audioCount}>0 songs</Text>
-      </TouchableOpacity>
+    <>
+      <ScrollView tw="p-5">
+        {playList?.map((item) => (
+          <TouchableOpacity
+            key={item.id.toString()}
+            style={styles.playListBanner}
+            onPress={() => handleBannerPress(item)}
+          >
+            <Text>{item.title}</Text>
+            <Text style={styles.audioCount}>
+              {item.audios.length > 1
+                ? `${item.audios.length} Songs`
+                : `${item.audios.length} Song`}
+            </Text>
+          </TouchableOpacity>
+        ))}
 
-      {playList?.map((item) => (
-        <TouchableOpacity
-          key={item.id.toString()}
-          style={styles.playListBanner}
-        >
-          <Text>{item.title}</Text>
-          <Text style={styles.audioCount}>
-            {item.audios.length > 1
-              ? `${item.audios.length} Songs`
-              : `${item.audios.length} Song`}
-          </Text>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Text style={styles.playListBtn}>+ Add New Playlist</Text>
         </TouchableOpacity>
-      ))}
 
-      <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Text style={styles.playListBtn}>+ Add New Playlist</Text>
-      </TouchableOpacity>
-
-      <PlayListInputModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onSubmit={createPlayList}
+        <PlayListInputModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onSubmit={createPlayList}
+        />
+      </ScrollView>
+      <PlayListDetail
+        onClose={() => setShowPlayList(false)}
+        visible={showPlayList}
+        playList={selectedPlayList}
       />
-    </ScrollView>
+    </>
   );
 };
 
