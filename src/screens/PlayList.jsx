@@ -10,10 +10,10 @@ import color from "../misc/color";
 import PlayListInputModal from "../components/PlayListInputModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AudioContext } from "../context/AudioProvider";
-import PlayListDetail from "../components/PlayListDetail";
+import PlayListDetail from "./PlayListDetail";
 
 let selectedPlayList = {};
-const PlayList = () => {
+const PlayList = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [showPlayList, setShowPlayList] = useState(false);
 
@@ -100,7 +100,8 @@ const PlayList = () => {
     }
     //no selected audio, simple open playlist
     selectedPlayList = playList;
-    setShowPlayList(true);
+    // setShowPlayList(true);
+    navigation.navigate("PlayListDetail", playList);
   };
 
   useEffect(() => {
@@ -135,11 +136,7 @@ const PlayList = () => {
           onSubmit={createPlayList}
         />
       </ScrollView>
-      <PlayListDetail
-        onClose={() => setShowPlayList(false)}
-        visible={showPlayList}
-        playList={selectedPlayList}
-      />
+      {/* <PlayListDetail playList={selectedPlayList} /> */}
     </>
   );
 };
