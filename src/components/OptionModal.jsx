@@ -10,13 +10,7 @@ import {
 import React from "react";
 import color from "../misc/color";
 
-const OptionModal = ({
-  visible,
-  currentItem,
-  onClose,
-  onPlayPress,
-  onPlayListPress,
-}) => {
+const OptionModal = ({ visible, currentItem, onClose, options }) => {
   const { filename } = currentItem;
   return (
     <>
@@ -27,16 +21,17 @@ const OptionModal = ({
             {filename}
           </Text>
           <View tw="p-5">
-            <TouchableOpacity onPress={onPlayPress}>
-              <Text style={styles.option}>Play</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPlayListPress}>
-              <Text style={styles.option}>Add to Playlist</Text>
-            </TouchableOpacity>
+            {options.map((optn) => {
+              return (
+                <TouchableOpacity key={optn.title} onPress={optn.onPress}>
+                  <Text style={styles.option}>{optn.title}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
         <TouchableWithoutFeedback onPress={onClose}>
-          <View tw="absolute inset-0" style={styles.modalBg}></View>
+          <View style={styles.modalBg}></View>
         </TouchableWithoutFeedback>
       </Modal>
     </>
@@ -68,5 +63,10 @@ const styles = StyleSheet.create({
   },
   modalBg: {
     backgroundColor: color.MODAL_BG,
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    right: 0,
+    left: 0,
   },
 });

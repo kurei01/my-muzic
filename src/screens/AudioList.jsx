@@ -5,9 +5,7 @@ import { LayoutProvider, RecyclerListView } from "recyclerlistview";
 import AudioItem from "../components/AudioItem";
 import Screen from "../components/Screen";
 import OptionModal from "../components/OptionModal";
-import {
-  selectAudio,
-} from "../misc/audioController";
+import { selectAudio } from "../misc/audioController";
 import { storeAudioForNextOpening } from "../misc/helper";
 
 export class AudioList extends Component {
@@ -56,6 +54,14 @@ export class AudioList extends Component {
     );
   };
 
+  navigateToPlaylist = () => {
+    this.context.updateState(this.context, {
+      addToPlayList: this.currentItem,
+    });
+    this.props.navigation.navigate("PlayListScreen", { screen: "PlayList" });
+    this.setState({ ...this.state, optionModalVisible: false });
+  };
+
   componentDidMount() {
     this.context.loadPreviousAudio();
   }
@@ -74,14 +80,13 @@ export class AudioList extends Component {
                 extendedState={{ isPlaying }}
               />
               <OptionModal
-                onPlayPress={() => console.log("playing audio")}
-                onPlayListPress={() => {
-                  this.context.updateState(this.context, {
-                    addToPlayList: this.currentItem,
-                  });
-                  this.props.navigation.navigate("PlayList");
-                  this.setState({ ...this.state, optionModalVisible: false });
-                }}
+                // onPlayPress={() => console.log("playing audio")}
+                options={[
+                  {
+                    title: "Add to playlist",
+                    onPress: this.navigateToPlaylist,
+                  },
+                ]}
                 currentItem={this.currentItem}
                 onClose={() =>
                   this.setState({ ...this.state, optionModalVisible: false })

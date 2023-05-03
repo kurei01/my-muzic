@@ -10,12 +10,10 @@ import color from "../misc/color";
 import PlayListInputModal from "../components/PlayListInputModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AudioContext } from "../context/AudioProvider";
-import PlayListDetail from "./PlayListDetail";
 
 let selectedPlayList = {};
 const PlayList = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [showPlayList, setShowPlayList] = useState(false);
 
   const context = useContext(AudioContext);
   const { playList, addToPlayList, updateState } = context;

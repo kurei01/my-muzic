@@ -130,6 +130,15 @@ export class AudioProvider extends Component {
         playbackDuration: playBackStatus.durationMillis,
       });
     }
+
+    if (playBackStatus.isLoaded && !playBackStatus.isPlaying) {
+      storeAudioForNextOpening(
+        this.state.currentAudio,
+        this.state.currentAudioIndex,
+        playBackStatus.positionMillis
+      );
+    }
+
     if (playBackStatus.didJustFinish) {
       if (this.state.isPlayListRunning) {
         let audio;
